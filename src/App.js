@@ -1,28 +1,57 @@
+import React, { useState } from "react";
+import { nanoid } from "nanoid";
+
 import Todo from "./components/Todo";
 import Form from "./components/Form";
 import FilterButton from "./components/FilterButton";
 
 function App(props) {
+
+  // passing props.tasks into the useState() hook
+  const [tasks, setTasks] = useState(props.tasks);
   
+  // adding new task
   function addTask(name) {
-    alert(name);
+    const newTask = { id: "todo-" + nanoid(), name: name, completed: false };
+    setTasks([...tasks, newTask]);
   }
 
-  const taskList = props.tasks.map(task => (
+  // checkbox toggle
+  function toggleTaskCompleted(id) {
+    const updatedTasks = tasks.map(task => {
+      // if this task has the same ID as the edited task
+      if (id === task.id) {
+        // use object spread to make a new object
+        // whose `completed` prop has been inverted
+        return {...task, completed: !task.completed}
+      }
+      return task;
+    });
+    setTasks(updatedTasks);
+  }
+
+  // all tasks
+  const taskList = tasks.map(task => (
       <Todo 
         id={task.id} 
         name={task.name} 
         completed={task.completed} 
         key={task.id}
+        checkTaskCompleted={toggleTaskCompleted}
       />
     )
   );
+
+  // change heading count
+  const tasksNoun = taskList.length !== 1 ? 'tasks' : 'task';
+  const headingText = `${taskList.length} ${tasksNoun} remaining`;
 
   return (
     <div className="todoapp stack-large">
 
       <h1>TodoMatic</h1>
       <Form addTaskInList={addTask} />
+      {/* addTask passed as a prop to form */}
 
       <div className="filters btn-group stack-exception">
         <FilterButton name="All" />
@@ -30,7 +59,7 @@ function App(props) {
         <FilterButton name="ffb" />
       </div>
 
-      <h2 id="list-heading">3 tasks remaining</h2>
+      <h2 id="list-heading">{headingText}</h2>
 
       <ul
         role="list"
